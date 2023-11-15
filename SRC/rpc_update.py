@@ -38,8 +38,7 @@ def rpcupdate(switch_ip: str, server_ip: str, method: str, firmware: str, user_n
 
     #print(json.dumps(request_data))
     try:
-       response = requests.post(url=f"https://{switch_ip}/restconf/operations/openconfig-tpcm:tpcm-list",
-                                data=json.dumps(request_data),
+       response = requests.post(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management/install/state/transfer-status",
                                 headers={'Content-Type': 'application/yang-data+json'},
                                 auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
                                 verify=False
