@@ -38,7 +38,8 @@ def rpcupdate(switch_ip: str, server_ip: str, method: str, firmware: str, user_n
 
     #print(json.dumps(request_data))
     try:
-       response = requests.post(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management/install/state/transfer-status",
+       response = requests.post(url=f"https://{switch_ip}/restconf/operations/openconfig-image-management:image-install",
+                                data=json.dumps(request_data)
                                 headers={'Content-Type': 'application/yang-data+json'},
                                 auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
                                 verify=False
@@ -53,7 +54,12 @@ def rpcupdate(switch_ip: str, server_ip: str, method: str, firmware: str, user_n
         #print(f'{response}')
         return response.content
 
+def check_error():
 
+def check_install():
+
+def changeboot():
+    
 
 def main():
     parser = argparse.ArgumentParser(description='Remote Firmware Upgrade tools')
