@@ -87,6 +87,32 @@ def bootswap(switch_ip: str, firmware: str, user_name: str, password: str) -> st
         #return response.content
         return myreturn
 
+def check_status(switch_ip: str, user_name: str, password: str):
+    """
+       Check Firmware Status Upgrade
+    """
+
+    try:
+       response = requests.get(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management",
+                                headers={'Content-Type': 'application/yang-data+json'},
+                                auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
+                                verify=False
+                                )
+       response.raise_for_status()
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        #print(f'{response}')
+        mystatus = json.loads(response.content)
+        myreturn = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
+        myimage = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
+        #return response.content
+        return [myreturn, myimage]
+
+
 def main():
     parser = argparse.ArgumentParser(description='Remote Firmware Upgrade tools')
     parser.add_argument("--method", help="http or https only", type=str)
@@ -109,10 +135,17 @@ def main():
        sonic_password = args.sonic_password
 
        if method == "http" or "https":
-        result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
-        print(f'{result}')
-        if result == SUCCESS :
-            result = bootswap(switch_ip=switch_ip, firmware=filename, user_name=sonic_username, password=sonic_password)
+        ## result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
+        ## print(f'{result}')
+        checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
+        print (f'{checkstate}')
+        print (f'{checkimage}')
+        while checkstate != "INSTALL_STATE_SUCCESS":
+             checkstate = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
+             print(f'{checkstate}')
+        result = "SUCCESS"
+        if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
+            result = bootswap(switch_ip=switch_ip, firmware=checkimage, user_name=sonic_username, password=sonic_password)
             print(f'{result}')
     else:
       print("IP address is not valid\r\nUse rpc_update.py -h for Help")
