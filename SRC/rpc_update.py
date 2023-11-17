@@ -52,14 +52,11 @@ def rpcupdate(switch_ip: str, server_ip: str, method: str, firmware: str, user_n
         print(f'Other error occurred: {err}')
     else:
         #print(f'{response}')
-        return response.content
+        mystatus = json.loads(response.content)
+        myreturn = mystatus["openconfig-image-management:output"]["status-detail"]
+        #return response.content
+        return myreturn
 
-def check_error():
-
-def check_install():
-
-def changeboot():
-    
 
 def main():
     parser = argparse.ArgumentParser(description='Remote Firmware Upgrade tools')
@@ -83,7 +80,8 @@ def main():
        sonic_password = args.sonic_password
 
        if method == "http" or "https":
-        result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
+        result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=son
+ic_password)
         print(f'{result}')
 
 
