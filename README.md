@@ -21,6 +21,7 @@ This Repo contains a Python script for deploy remotly a new firmware release sto
 
 The script allow to deploy a new firmware and change the boot index on a Dell Enterprise SONiC. <br />
 This script is for purpose test only and explain howto upgrade the Firmware
+This script don't restart the switch after the upgrade
 
 ## 📋 Requirements
 - Python 3.8.10 version minimum
@@ -34,7 +35,7 @@ See [Roadmap](#Roadmap) for more details and next feature.
 
 | Options         | Value            | Description                                 | Mandatory |
 |-----------------|------------------|---------------------------------------------|-----------|
-|--method         | HTTP or HTTPS    | Remote web servers                          |   Yes     |
+|--method         | http or https    | Remote web servers                          |   Yes     |
 |--switch_ip      | IPV4             | IP address of the DES management interface  |   Yes     |
 |--server_ip      | IPV4             | IP address of the Web Server                |   Yes     |
 |--filename       | type string      | Firmware name with full path                |   Yes     |
