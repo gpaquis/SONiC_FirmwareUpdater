@@ -140,11 +140,12 @@ def main():
         checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
         print (f'{checkstate}')
         print (f'{checkimage}')
-           
         while checkstate != "INSTALL_STATE_SUCCESS":
-             checkstate = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
+             checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
              print(f'{checkstate}')
-        
+             if checkstate == "INSTALL_STATE_SUCCESS":
+                break
+
         if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
             result = bootswap(switch_ip=switch_ip, firmware=checkimage, user_name=sonic_username, password=sonic_password)
             print(f'{result}')
