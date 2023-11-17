@@ -135,15 +135,16 @@ def main():
        sonic_password = args.sonic_password
 
        if method == "http" or "https":
-        ## result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
-        ## print(f'{result}')
+        result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
+        print(f'{result}')
         checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
         print (f'{checkstate}')
         print (f'{checkimage}')
+           
         while checkstate != "INSTALL_STATE_SUCCESS":
              checkstate = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
              print(f'{checkstate}')
-        result = "SUCCESS"
+        
         if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
             result = bootswap(switch_ip=switch_ip, firmware=checkimage, user_name=sonic_username, password=sonic_password)
             print(f'{result}')
