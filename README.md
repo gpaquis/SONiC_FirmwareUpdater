@@ -11,11 +11,11 @@ This Repo contains a Python script for deploy remotly a new firmware release sto
 
 ## Contents
 
-- [Description and Objective](#-description-and-objective)
-- [Requirements](#-requirements)
+- [Description and Objective](#-Description-and-Objective)
+- [Requirements](#-Requirements)
 - [Usage and Configuration](#Usage-and-Configuration)
 - [Roadmap](#Roadmap)
-- [How to Contribute](#-how-to-contribute)
+- [How to Contribute](#-How-to-Contribute)
 
 ## 🚀 Description and Objective
 
