@@ -154,22 +154,23 @@ def main():
 
        if method == "http" or "https":
         result = rpcupdate(remote_sw, server_ip=server_ip, method=method, firmware=filename)
-        print(f'Start install : {result}')
+        print(f'Start Downloading : {result}')
         return_status = check_status(remote_sw)
         checkstate = return_status['myreturn']
         checkimage = return_status['myimage']
         installPercent = return_status['percent_install']
 
 
-        print (f'Installation of: {checkimage}')
-        print (f'Install Status: {checkstate} : {installPercent}%')
+        print (f'Downloading of: {checkimage}')
+        print (f'Download Status: {checkstate} : {installPercent}%')
         while checkstate != "INSTALL_STATE_SUCCESS":
              return_status = check_status(remote_sw)
              checkstate = return_status['myreturn']
              checkimage = return_status['myimage']
              installPercent = return_status['percent_install']
-             print(f'Install Status: {checkstate} : {installPercent}%')
+             print(f'Download Status: {checkstate} : {installPercent}%')
              if checkstate == "INSTALL_STATE_SUCCESS":
+                print(f'Next step Boot Swap')
                 break
 
         if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
