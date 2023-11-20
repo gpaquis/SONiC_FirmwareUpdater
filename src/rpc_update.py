@@ -18,8 +18,6 @@ def validate_ip_address(ip_string) -> bool:
     except ValueError:
       return False
 
-
-#def rpcupdate(switch_ip: str, server_ip: str, method: str, firmware: str, user_name: str, password: str) -> str:
 def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
     """
         update firmware OS on SONiC OS
@@ -41,7 +39,6 @@ def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
         }
     }
 
-    #print(json.dumps(request_data))
     try:
        response = requests.post(url=f"https://{switch_ip}/restconf/operations/openconfig-image-management:image-install",
                                 data=json.dumps(request_data),
@@ -56,13 +53,10 @@ def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
     except Exception as err:
         print(f'Other error occurred: {err}')
     else:
-        #print(f'{response}')
         mystatus = json.loads(response.content)
         myreturn = mystatus["openconfig-image-management:output"]["status-detail"]
-        #return response.content
         return myreturn
 
-#def bootswap(switch_ip: str, firmware: str, user_name: str, password: str) -> str:
 def bootswap(remote_sw, firmware: str) -> str:
     """
         Swap Boot Firmware
@@ -91,13 +85,10 @@ def bootswap(remote_sw, firmware: str) -> str:
     except Exception as err:
         print(f'Other error occurred: {err}')
     else:
-        #print(f'{response}')
         mystatus = json.loads(response.content)
         myreturn = mystatus["openconfig-image-management:output"]["status-detail"]
-        #return response.content
         return myreturn
 
-#def check_status(switch_ip: str, user_name: str, password: str):
 def check_status(remote_sw):
     """
        Check Firmware Status Upgrade
@@ -120,13 +111,11 @@ def check_status(remote_sw):
     except Exception as err:
         print(f'Other error occurred: {err}')
     else:
-        #print(f'{response}')
         return_dict = dict();
         mystatus = json.loads(response.content)
         return_dict['myreturn'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
         return_dict['percent_install'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["file-progress"]
         return_dict['myimage'] = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
-        #return response.content
         return return_dict
 
 
@@ -145,6 +134,7 @@ def main():
 
     ip_switch = args.switch_ip
     server_ip = args.server_ip
+    
     if validate_ip_address(ip_switch) == True and validate_ip_address(server_ip) == True :
 
        sonic_username = args.sonic_username
@@ -155,20 +145,24 @@ def main():
        if method == "http" or "https":
         result = rpcupdate(remote_sw, server_ip=server_ip, method=method, firmware=filename)
         print(f'Start Downloading : {result}')
+
         return_status = check_status(remote_sw)
         checkstate = return_status['myreturn']
         checkimage = return_status['myimage']
         installPercent = return_status['percent_install']
-
-
+        
         print (f'Downloading of: {checkimage}')
         print (f'Download Status: {checkstate} : {installPercent}%')
+           
         while checkstate != "INSTALL_STATE_SUCCESS":
+    
              return_status = check_status(remote_sw)
              checkstate = return_status['myreturn']
              checkimage = return_status['myimage']
              installPercent = return_status['percent_install']
+             
              print(f'Download Status: {checkstate} : {installPercent}%')
+             
              if checkstate == "INSTALL_STATE_SUCCESS":
                 print(f'Next step Boot Swap')
                 break
@@ -178,7 +172,6 @@ def main():
             print(f'Boot Order change: {result}')
     else:
       print("IP address is not valid\r\nUse rpc_update.py -h for Help")
-
 
 if __name__ == '__main__':
     main()
