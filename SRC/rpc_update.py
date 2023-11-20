@@ -108,7 +108,8 @@ def check_status(switch_ip: str, user_name: str, password: str):
         #print(f'{response}')
         mystatus = json.loads(response.content)
         myreturn = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
-        percent_install = check_percent (switch_ip=switch_ip, user_name=user_name, password=password)
+        #percent_install = check_percent (switch_ip=switch_ip, user_name=user_name, password=password)
+        percent_install = mystatus["openconfig-image-management:image-management"]["install"]["state"]["file-progress"]
         myimage = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
         #return response.content
         return [myreturn, myimage, percent_install]
