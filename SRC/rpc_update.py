@@ -108,35 +108,10 @@ def check_status(switch_ip: str, user_name: str, password: str):
         #print(f'{response}')
         mystatus = json.loads(response.content)
         myreturn = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
-        #percent_install = check_percent (switch_ip=switch_ip, user_name=user_name, password=password)
         percent_install = mystatus["openconfig-image-management:image-management"]["install"]["state"]["file-progress"]
         myimage = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
         #return response.content
         return [myreturn, myimage, percent_install]
-
-
-def check_percent (switch_ip: str, user_name: str, password: str) -> str:
-    """
-        Check % install status
-    """
-
-    try:
-       response = requests.get(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management/install/state/file-progress",
-                                headers={'Content-Type': 'application/yang-data+json'},
-                                auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
-                                verify=False
-                                )
-       response.raise_for_status()
-
-    except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
-    else:
-        mystatus = json.loads(response.content)
-        myreturn = mystatus["openconfig-image-management:file-progress"]
-        return myreturn
-
 
 def main():
     parser = argparse.ArgumentParser(description='Remote Firmware Upgrade tools')
