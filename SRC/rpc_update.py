@@ -108,9 +108,33 @@ def check_status(switch_ip: str, user_name: str, password: str):
         #print(f'{response}')
         mystatus = json.loads(response.content)
         myreturn = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
+        percent_install = check_percent (switch_ip=switch_ip, user_name=user_name, password=password)
         myimage = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
         #return response.content
-        return [myreturn, myimage]
+        return [myreturn, myimage, percent_install]
+
+
+def check_percent (switch_ip: str, user_name: str, password: str) -> str:
+    """
+        Check % install status
+    """
+
+    try:
+       response = requests.get(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management/install/state/file-progress",
+                                headers={'Content-Type': 'application/yang-data+json'},
+                                auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
+                                verify=False
+                                )
+       response.raise_for_status()
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        mystatus = json.loads(response.content)
+        myreturn = mystatus["openconfig-image-management:file-progress"]
+        return myreturn
 
 
 def main():
@@ -136,19 +160,19 @@ def main():
 
        if method == "http" or "https":
         result = rpcupdate(switch_ip=switch_ip, server_ip=server_ip, method=method, firmware=filename, user_name=sonic_username, password=sonic_password)
-        print(f'{result}')
-        checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
-        print (f'{checkstate}')
-        print (f'{checkimage}')
+        print(f'Start install : {result}')
+        checkstate, checkimage, installPercent = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
+        print (f'Installation of: {checkimage}')
+        print (f'Install Status: {checkstate} : {installPercent}')
         while checkstate != "INSTALL_STATE_SUCCESS":
-             checkstate, checkimage = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
-             print(f'{checkstate}')
+             checkstate, checkimage, installPercent = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
+             print(f'Install Status: {checkstate} : {installPercent}')
              if checkstate == "INSTALL_STATE_SUCCESS":
                 break
 
         if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
             result = bootswap(switch_ip=switch_ip, firmware=checkimage, user_name=sonic_username, password=sonic_password)
-            print(f'{result}')
+            print(f'Boot Order change: {result}')
     else:
       print("IP address is not valid\r\nUse rpc_update.py -h for Help")
 
