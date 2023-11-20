@@ -29,7 +29,7 @@ This script don't restart the switch after the upgrade
 
 ## 🏁 Usage and Configuration
 The script support only deployment from HTTP/HTTPS, don't support local deployment.<br />
-See [Roadmap](#Roadmap) for more details and next feature.
+See [Roadmap](#-Roadmap) for more details and next feature.
 
 **Runing the script and options:**
 
