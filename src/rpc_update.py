@@ -140,7 +140,7 @@ def main():
     parser.add_argument("--sonic_password", help="SONiC Password", type=str)
     args = parser.parse_args()
 
-    method = args.method
+    method = args.method.lower()
     filename = args.filename
 
     ip_switch = args.switch_ip
