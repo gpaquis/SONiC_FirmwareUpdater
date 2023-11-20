@@ -139,10 +139,10 @@ def main():
         print(f'Start install : {result}')
         checkstate, checkimage, installPercent = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
         print (f'Installation of: {checkimage}')
-        print (f'Install Status: {checkstate} : {installPercent}')
+        print (f'Install Status: {checkstate} : {installPercent}%')
         while checkstate != "INSTALL_STATE_SUCCESS":
              checkstate, checkimage, installPercent = check_status(switch_ip=switch_ip, user_name=sonic_username, password=sonic_password)
-             print(f'Install Status: {checkstate} : {installPercent}')
+             print(f'Install Status: {checkstate} : {installPercent}%')
              if checkstate == "INSTALL_STATE_SUCCESS":
                 break
 
