@@ -29,7 +29,7 @@ def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
     """
 
     image_name = method+"://"+server_ip+"/"+firmware
-    print (image_name)
+    print (f'Install image from : {image_name}')
 
     switch_ip = remote_sw['ip_switch']
     user_name = remote_sw['sonic_username']
