@@ -43,7 +43,7 @@ See [Roadmap](#-Roadmap) for more details and next feature.
 |--sonic_password | type string      | Password used to access to the DES          |   Yes     |
 
 
-  `python3 rpc_update.py --method [http|https] --switch_ip 192.168.101.101 --server_ip 192.168.1.100 --filename firmware.bin --sonic_username admin --sonic_password YourPaSsWoRd`
+  `python3 SONiC_FirmwareUpdater.py --method [http|https] --switch_ip 192.168.101.101 --server_ip 192.168.1.100 --filename firmware.bin --sonic_username admin --sonic_password YourPaSsWoRd`
 
 ## 📅 Roadmap
 NONE <br />
