@@ -18,6 +18,7 @@ def validate_ip_address(ip_string) -> bool:
     except ValueError:
       return False
 
+
 def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
     """
         update firmware OS on SONiC OS
@@ -118,6 +119,34 @@ def check_status(remote_sw):
         return_dict['myimage'] = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
         return return_dict
 
+def check_boot_order(remote_sw):
+    """
+       Check Boot Order
+    """
+
+    switch_ip = remote_sw['ip_switch']
+    user_name = remote_sw['sonic_username']
+    password = remote_sw['sonic_password']
+
+    try:
+       response = requests.get(url=f"https://{switch_ip}/restconf/data/openconfig-image-management:image-management/global/state",
+                                headers={'Content-Type': 'application/yang-data+json'},
+                                auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
+                                verify=False
+                                )
+       response.raise_for_status()
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        return_dict = dict();
+        mystatus = json.loads(response.content)
+        return_dict['current'] = mystatus["openconfig-image-management:state"]["current"]
+        return_dict['next'] = mystatus["openconfig-image-management:state"]["next-boot"]
+        return return_dict
+
 
 def main():
     parser = argparse.ArgumentParser(description='Remote Firmware Upgrade tools')
@@ -134,7 +163,6 @@ def main():
 
     ip_switch = args.switch_ip
     server_ip = args.server_ip
-    
     if validate_ip_address(ip_switch) == True and validate_ip_address(server_ip) == True :
 
        sonic_username = args.sonic_username
@@ -143,26 +171,30 @@ def main():
        remote_sw = {'ip_switch':ip_switch, 'sonic_username':sonic_username, 'sonic_password':sonic_password}
 
        if method == "http" or "https":
+        return_boot = check_boot_order(remote_sw)
+        boot_current = return_boot['current']
+        print(f'current : {boot_current}')
+
         result = rpcupdate(remote_sw, server_ip=server_ip, method=method, firmware=filename)
         print(f'Start Downloading : {result}')
-
         return_status = check_status(remote_sw)
         checkstate = return_status['myreturn']
         checkimage = return_status['myimage']
         installPercent = return_status['percent_install']
-        
+
+
         print (f'Downloading of: {checkimage}')
         print (f'Download Status: {checkstate} : {installPercent}%')
-           
         while checkstate != "INSTALL_STATE_SUCCESS":
-    
              return_status = check_status(remote_sw)
              checkstate = return_status['myreturn']
              checkimage = return_status['myimage']
              installPercent = return_status['percent_install']
-             
-             print(f'Download Status: {checkstate} : {installPercent}%')
-             
+
+             if checkstate == "INSTALL_PROGRESS":
+                 print(f'Please wait : {checkstate}')
+             else:
+                 print(f'Download Status: {checkstate} : {installPercent}%')
              if checkstate == "INSTALL_STATE_SUCCESS":
                 print(f'Next step Boot Swap')
                 break
@@ -170,8 +202,15 @@ def main():
         if result == "SUCCESS" and checkstate == "INSTALL_STATE_SUCCESS":
             result = bootswap(remote_sw, firmware=checkimage)
             print(f'Boot Order change: {result}')
+            if result == "SUCCESS":
+                return_boot = check_boot_order(remote_sw)
+                boot_next = return_boot['next']
+                print(f'next-boot : {boot_next}')
+
+
     else:
       print("IP address is not valid\r\nUse rpc_update.py -h for Help")
+
 
 if __name__ == '__main__':
     main()
