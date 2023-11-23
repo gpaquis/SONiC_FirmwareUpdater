@@ -21,9 +21,9 @@ def validate_ip_address(ip_string) -> bool:
 
 def cancel_install(remote_sw):
     """
-        Cancel installtion image
+        Cancel installation image
         By default REST api don't return the CRC state
-        If the INSTALL_IDLE at 100% stay stuck after 500 cycles the install is canceled
+        If the INSTALL_IDLE at 100% stay stuck after 200 cycles the install is canceled
         Until the REST API return is not update, use with caution
     """
 
