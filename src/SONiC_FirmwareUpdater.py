@@ -1,3 +1,4 @@
+
 import json
 import argparse
 import ast
@@ -18,6 +19,39 @@ def validate_ip_address(ip_string) -> bool:
     except ValueError:
       return False
 
+def cancel_install(remote_sw):
+    """
+        Cancel installtion image
+        By default REST api don't return the CRC state
+        If the INSTALL_IDLE at 100% stay stuck after 500 cycles the install is canceled
+        Until the REST API return is not update, use with caution
+    """
+
+    switch_ip = remote_sw['ip_switch']
+    user_name = remote_sw['sonic_username']
+    password = remote_sw['sonic_password']
+
+    request_data = {
+        "openconfig-image-management:input": {
+        }
+    }
+    try:
+       response = requests.post(url=f"https://{switch_ip}/restconf/operations/openconfig-image-management:image-install-cancel",
+                                data=json.dumps(request_data),
+                                headers={'Content-Type': 'application/yang-data+json'},
+                                auth=HTTPBasicAuth(f"{user_name}", f"{password}"),
+                                verify=False
+                                )
+       response.raise_for_status()
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        mystatus = json.loads(response.content)
+        myreturn = mystatus["openconfig-image-management:output"]["status-detail"]
+        return myreturn
 
 def rpcupdate(remote_sw, server_ip: str, method: str, firmware: str) -> str:
     """
@@ -72,6 +106,7 @@ def bootswap(remote_sw, firmware: str) -> str:
            "image-name": firmware
         }
     }
+
     try:
        response = requests.post(url=f"https://{switch_ip}/restconf/operations/openconfig-image-management:image-default",
                                 data=json.dumps(request_data),
@@ -185,6 +220,7 @@ def main():
 
         print (f'Downloading of: {checkimage}')
         print (f'Download Status: {checkstate} : {installPercent}%')
+        loops=0
         while checkstate != "INSTALL_STATE_SUCCESS":
              return_status = check_status(remote_sw)
              checkstate = return_status['myreturn']
@@ -193,8 +229,17 @@ def main():
 
              if checkstate == "INSTALL_PROGRESS":
                  print(f'Please wait : {checkstate}')
-             else:
+             if checkstate == "INSTALL_IDLE":
                  print(f'Download Status: {checkstate} : {installPercent}%')
+
+                 if installPercent == 100:
+                    print(f'Check CRC in progress {loops}')
+                    loops = loops + 1
+                    if loops >200:
+                      result_cancel = cancel_install(remote_sw)
+                      result = 'FAIL'
+                      break
+
              if checkstate == "INSTALL_STATE_SUCCESS":
                 print(f'Next step Boot Swap')
                 break
@@ -206,6 +251,9 @@ def main():
                 return_boot = check_boot_order(remote_sw)
                 boot_next = return_boot['next']
                 print(f'next-boot : {boot_next}')
+
+        if result == "FAIL":
+            print(f'Check CRC {result} for {filename}, Install Cancelation {result_cancel}')
 
 
     else:
