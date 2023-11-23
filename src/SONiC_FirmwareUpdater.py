@@ -222,7 +222,7 @@ def main():
         installPercent = return_status['percent_install']
 
 
-        print (f'Downloading of: {checkimage}')
+        #print (f'Downloading of: {checkimage}')
         print (f'{checktransfert} : {installPercent}%')
         loops=0
         while checkstate == "INSTALL_IDLE":
