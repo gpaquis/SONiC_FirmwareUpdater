@@ -215,7 +215,7 @@ def main():
         print(f'Start Downloading : {result}')
         return_status = check_status(remote_sw)
         checkstate = return_status['myinstall-status']
-        checkimage = return_status['myimage']
+        #checkimage = return_status['myimage']
         checktransfert = return_status['myimgstatus']
         installPercent = return_status['percent_install']
 
@@ -226,7 +226,7 @@ def main():
         while checkstate == "INSTALL_IDLE":
              return_status = check_status(remote_sw)
              checkstate = return_status['myinstall-status']
-             checkimage = return_status['myimage']
+             #checkimage = return_status['myimage']
              checktransfert = return_status['myimgstatus']
              installPercent = return_status['percent_install']
 
