@@ -151,7 +151,6 @@ def check_status(remote_sw):
         mystatus = json.loads(response.content)
         return_dict['myinstall-status'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["install-status"]
         return_dict['myimgstatus'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["transfer-status"]
-        return_dict['myopstatus'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["operation-status"]
         return_dict['percent_install'] = mystatus["openconfig-image-management:image-management"]["install"]["state"]["file-progress"]
         return_dict['myimage'] = mystatus["openconfig-image-management:image-management"]["global"]["state"]["next-boot"]
         return return_dict
@@ -218,7 +217,6 @@ def main():
         checkstate = return_status['myinstall-status']
         checkimage = return_status['myimage']
         checktransfert = return_status['myimgstatus']
-        checkopstatus = return_status['myopstatus']
         installPercent = return_status['percent_install']
 
 
@@ -230,7 +228,6 @@ def main():
              checkstate = return_status['myinstall-status']
              checkimage = return_status['myimage']
              checktransfert = return_status['myimgstatus']
-             checkopstatus = return_status['myopstatus']
              installPercent = return_status['percent_install']
 
              if checktransfert == "TRANSFER_FILE_EXTRACTION":
