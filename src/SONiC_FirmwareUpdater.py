@@ -174,8 +174,12 @@ def check_boot_order(remote_sw):
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
+        myreturn = False
+        return myreturn
     except Exception as err:
         print(f'Other error occurred: {err}')
+        myreturn =  False
+        return myreturn
     else:
         return_dict = dict();
         mystatus = json.loads(response.content)
@@ -201,72 +205,72 @@ def main():
     server_ip = args.server_ip
     if validate_ip_address(ip_switch) == True and validate_ip_address(server_ip) == True :
 
-       sonic_username = args.sonic_username
-       sonic_password = args.sonic_password
+     sonic_username = args.sonic_username
+     sonic_password = args.sonic_password
 
-       remote_sw = {'ip_switch':ip_switch, 'sonic_username':sonic_username, 'sonic_password':sonic_password}
+     remote_sw = {'ip_switch':ip_switch, 'sonic_username':sonic_username, 'sonic_password':sonic_password}
 
-       if method == "http" or "https":
-        return_boot = check_boot_order(remote_sw)
+     if method == "http" or "https":
+       return_boot = check_boot_order(remote_sw)
+       if return_boot != False:
         boot_current = return_boot['current']
         print(f'current : {boot_current}')
 
         result = rpcupdate(remote_sw, server_ip=server_ip, method=method, firmware=filename)
         print(f'Start Downloading : {result}')
+
         return_status = check_status(remote_sw)
         checkstate = return_status['myinstall-status']
-        #checkimage = return_status['myimage']
+        checkimage = return_status['myimage']
         checktransfert = return_status['myimgstatus']
         installPercent = return_status['percent_install']
 
 
-        #print (f'Downloading of: {checkimage}')
         print (f'{checktransfert} : {installPercent}%')
         loops=0
         while checkstate == "INSTALL_IDLE":
-             return_status = check_status(remote_sw)
-             checkstate = return_status['myinstall-status']
-             #checkimage = return_status['myimage']
-             checktransfert = return_status['myimgstatus']
-             installPercent = return_status['percent_install']
+         return_status = check_status(remote_sw)
+         checkstate = return_status['myinstall-status']
+         checkimage = return_status['myimage']
+         checktransfert = return_status['myimgstatus']
+         installPercent = return_status['percent_install']
 
-             if checktransfert == "TRANSFER_FILE_EXTRACTION":
-                print(f'{checktransfert}')
+         if checktransfert == "TRANSFER_FILE_EXTRACTION":
+          print(f'{checktransfert}')
 
-             elif checktransfert == "TRANSFER_VALIDATION" and installPercent ==100:
-                print(f'Check CRC in progress {loops}')
-                loops = loops + 1
-                if loops >200:
-                  result_cancel = cancel_install(remote_sw)
-                  result = 'FAIL'
-                  break
+         elif checktransfert == "TRANSFER_VALIDATION" and installPercent ==100:
+          print(f'Check CRC in progress {loops}')
+          loops = loops + 1
+          if loops >200:
+           result_cancel = cancel_install(remote_sw)
+           result = 'FAIL'
+           break
 
-             else:
-                  print(f'{checktransfert} : {installPercent}%')
+          else:
+           print(f'{checktransfert} : {installPercent}%')
 
         while checkstate == "INSTALL_PROGRESS":
-           return_status = check_status(remote_sw)
-           checkstate = return_status['myinstall-status']
-           print(f'Please wait : {checkstate}')
+         return_status = check_status(remote_sw)
+         checkstate = return_status['myinstall-status']
+         print(f'Please wait : {checkstate}')
 
         if checkstate == "INSTALL_STATE_SUCCESS":
-           print(f'Next step Boot Swap')
-           return_status = check_status(remote_sw)
-           checkimage = return_status['myimage']
-           result = bootswap(remote_sw, firmware=checkimage)
-           if result == "SUCCESS":
-              print(f'Boot Order change: {result}')
-              return_boot = check_boot_order(remote_sw)
-              boot_next = return_boot['next']
-              print(f'next-boot : {boot_next}')
+         print(f'Next step Boot Swap')
+         return_status = check_status(remote_sw)
+         checkimage = return_status['myimage']
+         result = bootswap(remote_sw, firmware=checkimage)
+         if result == "SUCCESS":
+          print(f'Boot Order change: {result}')
+          return_boot = check_boot_order(remote_sw)
+          boot_next = return_boot['next']
+          print(f'next-boot : {boot_next}')
 
         if result == "FAIL":
-            print(f'Check CRC {result} for {filename}, Install Cancelation {result_cancel}')
+         print(f'Check CRC {result} for {filename}, Install Cancelation {result_cancel}')
 
 
-    else:
-      print("IP address is not valid\r\nUse rpc_update.py -h for Help")
-
+       else:
+         print("IP address is not valid or unreachable\r\nUse rpc_update.py -h for Help")
 
 if __name__ == '__main__':
     main()
