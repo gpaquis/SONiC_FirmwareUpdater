@@ -236,18 +236,24 @@ def main():
          installPercent = return_status['percent_install']
 
          if checktransfert == "TRANSFER_FILE_EXTRACTION":
-          print(f'{checktransfert}')
+             print(f'Please Wait...')
 
-         elif checktransfert == "TRANSFER_VALIDATION" and installPercent ==100:
-          print(f'Check CRC in progress {loops}')
-          loops = loops + 1
+         if checktransfert == "TRANSFER_FILE_VALIDATION_FAILED":
+           print(f'{checktransfert}')
+           result_cancel = cancel_install(remote_sw)
+           result = 'FAIL'
+           break
+
+         if checktransfert == "TRANSFER_VALIDATION" and installPercent ==100:
+          print(f'Check in progress {loops}')
+          loops = loops+1
           if loops >200:
            result_cancel = cancel_install(remote_sw)
            result = 'FAIL'
            break
 
-          else:
-           print(f'{checktransfert} : {installPercent}%')
+         else:
+             print(f'Status: {checktransfert}')
 
         while checkstate == "INSTALL_PROGRESS":
          return_status = check_status(remote_sw)
@@ -255,9 +261,9 @@ def main():
          print(f'Please wait : {checkstate}')
 
         if checkstate == "INSTALL_FAILED":
-         result_cancel = cancel_install(remote_sw)
-         result = 'FAIL'
-           
+           result_cancel = cancel_install(remote_sw)
+           result = 'FAIL'
+
         if checkstate == "INSTALL_STATE_SUCCESS":
          print(f'Next step Boot Swap')
          return_status = check_status(remote_sw)
@@ -269,11 +275,14 @@ def main():
           boot_next = return_boot['next']
           print(f'next-boot : {boot_next}')
 
+
         if result == "FAIL":
-         print(f'{result} : Check CRC for {filename}, Install Cancelation {result_cancel}')
+            print(f'{result} : Check CRC for {filename}, Install Cancelation {result_cancel}')
+
 
        else:
          print("IP address is not valid or unreachable\r\nUse rpc_update.py -h for Help")
+
 
 if __name__ == '__main__':
     main()
