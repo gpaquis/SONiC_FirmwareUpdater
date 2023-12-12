@@ -254,6 +254,10 @@ def main():
          checkstate = return_status['myinstall-status']
          print(f'Please wait : {checkstate}')
 
+        if checkstate == "INSTALL_FAILED":
+         result_cancel = cancel_install(remote_sw)
+         result = 'FAIL'
+           
         if checkstate == "INSTALL_STATE_SUCCESS":
          print(f'Next step Boot Swap')
          return_status = check_status(remote_sw)
@@ -266,8 +270,7 @@ def main():
           print(f'next-boot : {boot_next}')
 
         if result == "FAIL":
-         print(f'Check CRC {result} for {filename}, Install Cancelation {result_cancel}')
-
+         print(f'{result} : Check CRC for {filename}, Install Cancelation {result_cancel}')
 
        else:
          print("IP address is not valid or unreachable\r\nUse rpc_update.py -h for Help")
